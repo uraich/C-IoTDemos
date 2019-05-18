@@ -7,7 +7,12 @@
 
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#ifdef ESP8266
 #define ONE_WIRE_BUS 4               // GPIO pin on which the DS18B20 is connected
+#endif
+#ifdef ESP32
+#define ONE_WIRE_BUS 21              // GPIO pin on which the DS18B20 is connected
+#endif
 
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
