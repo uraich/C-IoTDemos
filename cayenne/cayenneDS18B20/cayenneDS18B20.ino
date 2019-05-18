@@ -13,13 +13,13 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature DS18B20(&oneWire);
 
 // WiFi network info.
-char ssid[] = "SFR_A0F0";
-char wifiPassword[] = "osto7rawayristaxtris";
+char ssid[] = "WIFI_SSID";
+char wifiPassword[] = "WIFI password";
 
 // Cayenne authentication info. This should be obtained from the Cayenne Dashboard.
-char username[] = "7c70a330-69af-11e8-a76a-fdebb8d0010d";
-char password[] = "32d184add41570759dd1735fa464cef7e62876a4";
-char clientID[] = "dae86710-4ae9-11e9-a6b5-e30ec853fbf2";
+char username[] = "CAYENNE USERNAME";
+char password[] = "CAYENNE PASSWORD";
+char clientID[] = "CAYENNE_CLIENT_ID";
 
 unsigned long lastMillis = 0;
 
