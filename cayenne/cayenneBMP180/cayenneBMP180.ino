@@ -1,5 +1,5 @@
-// cayenneDS18B30
-// Reads out the Maxim DS18B20 temperature sensor and publishes the
+// cayenneBMP180
+// Reads out the BMP180 temperature and barometric pressure sensor and publishes the
 // results on Cayenne
 // Copyright Uli Raich
 // This program is part of the workshop on IoT at the African Internet Summit
@@ -15,17 +15,8 @@
 #include <CayenneMQTTESP32.h>
 #endif
 
-#include <OneWire.h>
-#include <DallasTemperature.h>
-#ifdef ESP8266
-#define ONE_WIRE_BUS 4               // GPIO pin on which the DS18B20 is connected
-#endif
-#ifdef ESP32
-#define ONE_WIRE_BUS 21              // GPIO pin on which the DS18B20 is connected
-#endif
-
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature DS18B20(&oneWire);
+#include <Wire.h>
+#include <Adafruit_BMP085.h>
 
 // WiFi network info.
 char ssid[] = "WIFI_SSID";
@@ -37,9 +28,14 @@ char password[] = "CAYENNE PASSWORD";
 char clientID[] = "CAYENNE_CLIENT_ID";
 
 unsigned long lastMillis = 0;
+Adafruit_BMP085 bmp;
 
 void setup() {
 	Serial.begin(115200);
+        if (!bmp.begin()) {
+	  Serial.println("Could not find a valid BMP180 sensor, check wiring!");
+	  while (1) {}
+	}
 	Cayenne.begin(username, password, clientID, ssid, wifiPassword);
 }
 
@@ -51,15 +47,17 @@ void loop() {
 // You can also use functions for specific channels, e.g CAYENNE_OUT(1) for sending channel 1 data.
 CAYENNE_OUT_DEFAULT()
 {
-  // Write data to Cayenne here. This example just sends the current uptime in milliseconds on virtual channel 0.
-  //Cayenne.virtualWrite(0, millis());
-  // Some examples of other functions you can use to send data.
-  int ds18b20Channel
-  float temp;
-  DS18B20.requestTemperatures(); 
-  temp=DS18B20.getTempCByIndex(0);
+	// Write data to Cayenne here. This example just sends the current uptime in milliseconds on virtual channel 0.
+	//Cayenne.virtualWrite(0, millis());
+	// Some examples of other functions you can use to send data.
+  float temp,pressure;
+  int bmp180TempChannel = 12;
+  int bmp180PressChannel = 13;
+  temp=bmp.readTemperature();
+  pressure = bmp.readSealevelPressure()/100.0;
   
-  Cayenne.celsiusWrite(ds18b20Channel, temp);
+  Cayenne.celsiusWrite(bmp180TempChannel, temp);
+  Cayenne.hectoPascalWrite(bmp180PressChannel,pressure)
   //Cayenne.luxWrite(2, 700);
   //Cayenne.virtualWrite(3, 50, TYPE_PROXIMITY, UNIT_CENTIMETER);
 }

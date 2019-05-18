@@ -1,5 +1,5 @@
-// cayenneDS18B30
-// Reads out the Maxim DS18B20 temperature sensor and publishes the
+// cayenneDHT11
+// Reads out the DHT11 temperature and humidity sensor and publishes the
 // results on Cayenne
 // Copyright Uli Raich
 // This program is part of the workshop on IoT at the African Internet Summit
@@ -15,32 +15,33 @@
 #include <CayenneMQTTESP32.h>
 #endif
 
-#include <OneWire.h>
-#include <DallasTemperature.h>
+#include "DHT.h"
 #ifdef ESP8266
-#define ONE_WIRE_BUS 4               // GPIO pin on which the DS18B20 is connected
-#endif
-#ifdef ESP32
-#define ONE_WIRE_BUS 21              // GPIO pin on which the DS18B20 is connected
+#define DHTPIN 2     // Digital pin connected to the DHT sensor
 #endif
 
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature DS18B20(&oneWire);
+#ifdef ESP32
+#define DHTPIN 16     // Digital pin connected to the DHT sensor
+#endif
+#define CAYENNE_DEBUG
+#define CAYENNE_PRINT Serial
 
 // WiFi network info.
 char ssid[] = "WIFI_SSID";
-char wifiPassword[] = "WIFI password";
+char wifiPassword[] = "WIFI PASSWORD";
 
 // Cayenne authentication info. This should be obtained from the Cayenne Dashboard.
 char username[] = "CAYENNE USERNAME";
 char password[] = "CAYENNE PASSWORD";
-char clientID[] = "CAYENNE_CLIENT_ID";
+char clientID[] = "CAYENNE CLIENT_ID";
 
-unsigned long lastMillis = 0;
+#define DHTTYPE DHT11   // DHT 11
+DHT dht(DHTPIN, DHTTYPE);
 
 void setup() {
-	Serial.begin(115200);
-	Cayenne.begin(username, password, clientID, ssid, wifiPassword);
+  Serial.begin(115200);
+  dht.begin();
+  Cayenne.begin(username, password, clientID, ssid, wifiPassword);
 }
 
 void loop() {
@@ -51,17 +52,15 @@ void loop() {
 // You can also use functions for specific channels, e.g CAYENNE_OUT(1) for sending channel 1 data.
 CAYENNE_OUT_DEFAULT()
 {
-  // Write data to Cayenne here. This example just sends the current uptime in milliseconds on virtual channel 0.
-  //Cayenne.virtualWrite(0, millis());
-  // Some examples of other functions you can use to send data.
-  int ds18b20Channel
-  float temp;
-  DS18B20.requestTemperatures(); 
-  temp=DS18B20.getTempCByIndex(0);
+  int dht11TempChannel = 7;
+  int dht11HumChannel = 8;
+  float temp,hum;
+  // Write data to Cayenne here. 
+  hum = dht.readHumidity();
+  temp= dht.readTemperature();
+  Cayenne.celsiusWrite(dht11TempChannel, temp);
+  Cayenne.virtualWrite(dht11HumChannel, hum, TYPE_RELATIVE_HUMIDITY, UNIT_PERCENT);
   
-  Cayenne.celsiusWrite(ds18b20Channel, temp);
-  //Cayenne.luxWrite(2, 700);
-  //Cayenne.virtualWrite(3, 50, TYPE_PROXIMITY, UNIT_CENTIMETER);
 }
 
 // Default function for processing actuator commands from the Cayenne Dashboard.
