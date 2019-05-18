@@ -1,0 +1,26 @@
+/* button.ino
+ *  Reads out the state of a push button and prints the result 
+ *  This program was developed for the workshop on IoT during the
+ *  African Interner Summit 2019, Kampala, Uganda
+ *  Copyright U. Raich
+ *  This program is released under GPL
+ */
+
+int pbPin = 0;
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Push button test program");
+  pinMode(pbPin,INPUT);
+}
+
+void loop() {
+  int state;
+  state = digitalRead(pbPin);
+  if (state)
+    Serial.println("Switch is released");
+  else
+    Serial.println("Switch is pressed");
+  delay(1000);
+
+}
